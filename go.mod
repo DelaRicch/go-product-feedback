@@ -3,9 +3,13 @@ module github.com/DelaRich/product-feedback-go
 go 1.21.1
 
 require (
+	github.com/gofiber/fiber/v2 v2.51.0
+	github.com/gofiber/storage/mongodb/v2 v2.0.0-20240101070850-a1f3be3afdda
+	github.com/joho/godotenv v1.5.1
+)
+
+require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
-	github.com/gofiber/fiber/v2 v2.51.0 // indirect
-	github.com/gofiber/storage/mongodb/v2 v2.0.0-20240101070850-a1f3be3afdda // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/klauspost/compress v1.16.7 // indirect
