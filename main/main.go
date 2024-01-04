@@ -1,12 +1,21 @@
 package main
 
 import (
+	"log"
+
+	"github.com/DelaRich/product-feedback-go/database"
+	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2")
+)
 
 func main() {
-	app := fiber.New()
+	  // Establish database connection
+	  if err := database.ConnectDb(); err != nil {
+        log.Fatal(err)
+    }
+    defer database.DisconnectDb()
 
+	app := fiber.New()
 	app.Use(cors.New())
 
 	// setupRoutes
