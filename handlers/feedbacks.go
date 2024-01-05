@@ -9,6 +9,7 @@ import (
 	"github.com/DelaRich/product-feedback-go/models"
 	"github.com/gofiber/fiber/v2"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func Home(ctx *fiber.Ctx) error {
@@ -74,7 +75,8 @@ func AddFeedback(ctx *fiber.Ctx) error {
 
 func GetFeedbacks(ctx *fiber.Ctx) error {
 	collection := database.GetCollection("feedbacks")
-	cursor, err := collection.Find(context.Background(), bson.M{})
+	options := options.Find().SetSort(bson.D{{Key: "updatedAt", Value: -1}})
+	cursor, err := collection.Find(context.Background(), bson.M{}, options)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"message": "Error fetching users",
@@ -95,6 +97,7 @@ func GetFeedbacks(ctx *fiber.Ctx) error {
 		}
 		feedbacks = append(feedbacks, feedback)
 	}
+
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message":    "Successfully retrieved feedbacks",

@@ -27,6 +27,7 @@ type Feedback struct {
 	Category string `json:"category" bson:"category"`
 	Details string `json:"details" bson:"details"`
 	Upvotes int `json:"upvotes" bson:"upvotes"`
+	Status string `json:"status" bson:"status"`
 	Comments []Comment `json:"comments" bson:"comments"`
 	CreatedAt    time.Time `json:"createdAt" bson:"createdAt"`
     UpdatedAt    time.Time `json:"updatedAt" bson:"updatedAt"`
