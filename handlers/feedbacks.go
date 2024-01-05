@@ -99,6 +99,21 @@ func GetFeedbacks(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message":    "Successfully retrieved feedbacks",
 		"success":    true,
-		"feedbaacks": feedbacks,
+		"feedbacks": feedbacks,
+	})
+}
+
+func DeleteAllFeedbacks(ctx *fiber.Ctx) error {
+	collection := database.GetCollection("feedbacks")
+	_, err := collection.DeleteMany(context.Background(), bson.M{})
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Error deleting feedbacks",
+			"success": false,
+		})
+	}
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "All feedbacks deleted successfully",
+		"success": true,
 	})
 }
