@@ -19,6 +19,7 @@ type Comment struct {
 	Id primitive.ObjectID `json:"id" bson:"_id,omitempty"`
 	FeedbackId primitive.ObjectID `json:"feedbackId" bson:"feedbackId"`
 	UserId primitive.ObjectID `json:"userId" bson:"userId"`
+	Comment string `json:"comment" bson:"comment"`
 }
 
 type Feedback struct {

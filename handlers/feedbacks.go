@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/DelaRich/product-feedback-go/database"
@@ -42,7 +43,8 @@ func AddFeedback(ctx *fiber.Ctx) error {
 		})
 	}
 
-	// Set created and updated time
+	// Set status, created and updated time
+	newFeedback.Status = "planned"
 	newFeedback.CreatedAt = time.Now()
 	newFeedback.UpdatedAt = time.Now()
 
@@ -53,7 +55,7 @@ func AddFeedback(ctx *fiber.Ctx) error {
 	ress := collection.FindOne(context.Background(), bson.M{"title": newFeedback.Title}).Decode(&existingFeedback)
 	if ress == nil {
 		return ctx.Status(fiber.StatusConflict).JSON(fiber.Map{
-			"message": "Feedback wit the same title already exists",
+			"message": "Feedback with the same title already exists",
 			"success": false,
 		})
 
@@ -62,13 +64,69 @@ func AddFeedback(ctx *fiber.Ctx) error {
 	_, err := collection.InsertOne(context.Background(), newFeedback)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"message": "Failed to insert user",
+			"message": "Failed to create feedback",
 			"success": false,
 		})
 	}
 
 	return ctx.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"message": "Feedback added successfully",
+		"success": true,
+	})
+}
+
+
+func EditFeedback(ctx *fiber.Ctx) error {
+	feedback := new(models.Feedback)
+
+
+	if err := ctx.BodyParser(feedback); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": err.Error(),
+		})
+	}
+
+	// Validate titlte field
+	if !helpers.IsValidInput(feedback.Title) {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid title",
+			"success": false,
+		})
+	}
+
+	// Check for empty feedback title
+	if feedback.Title == "" {
+		return ctx.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Feedback title cannot be empty",
+			"success": false,
+		})
+	}
+
+
+	collection := database.GetCollection("feedbacks")
+	filter := bson.M{"_id": feedback.Id}
+	
+	update := bson.M{"$set": bson.M{"title": feedback.Title, "category": feedback.Category, "details": feedback.Details, "status": feedback.Status, "updatedAt": time.Now()}}
+	fmt.Println(filter)
+res, err := collection.UpdateOne(context.Background(), filter, update)
+
+if err != nil {
+	return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+		"message": "Error updating feedback",
+		"success": false,
+	})
+}
+
+if res.ModifiedCount == 0 {
+    return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+        "message": "Feedback not found",
+        "success": false,
+    })
+}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Feedback updated successfully",
 		"success": true,
 	})
 }
