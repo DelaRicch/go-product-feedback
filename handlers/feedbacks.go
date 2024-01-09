@@ -75,10 +75,8 @@ func AddFeedback(ctx *fiber.Ctx) error {
 	})
 }
 
-
 func EditFeedback(ctx *fiber.Ctx) error {
 	feedback := new(models.Feedback)
-
 
 	if err := ctx.BodyParser(feedback); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
@@ -103,32 +101,65 @@ func EditFeedback(ctx *fiber.Ctx) error {
 		})
 	}
 
-
 	collection := database.GetCollection("feedbacks")
 	filter := bson.M{"_id": feedback.Id}
-	
+
 	update := bson.M{"$set": bson.M{"title": feedback.Title, "category": feedback.Category, "details": feedback.Details, "status": feedback.Status, "updatedAt": time.Now()}}
 	fmt.Println(filter)
-res, err := collection.UpdateOne(context.Background(), filter, update)
+	res, err := collection.UpdateOne(context.Background(), filter, update)
 
-if err != nil {
-	return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-		"message": "Error updating feedback",
-		"success": false,
-	})
-}
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Error updating feedback",
+			"success": false,
+		})
+	}
 
-if res.ModifiedCount == 0 {
-    return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
-        "message": "Feedback not found",
-        "success": false,
-    })
-}
+	if res.ModifiedCount == 0 {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Feedback not found",
+			"success": false,
+		})
+	}
 
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
 		"message": "Feedback updated successfully",
 		"success": true,
 	})
+}
+
+func DeleteFeedback(ctx *fiber.Ctx) error {
+	feedback := new(models.Feedback)
+
+	if err := ctx.BodyParser(feedback); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"success": false,
+			"message": err.Error(),
+		})
+	}
+
+	collection := database.GetCollection("feedbacks")
+	filter := bson.M{"_id": feedback.Id}
+	res, err := collection.DeleteOne(context.Background(), filter)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Error deleting feedback",
+			"success": false,
+		})
+	}
+
+	if res.DeletedCount == 0 {
+		return ctx.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"message": "Feedback not found",
+			"success": false,
+		})
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Feedback deleted successfully",
+		"success": true,
+	})
+
 }
 
 func GetFeedbacks(ctx *fiber.Ctx) error {
@@ -156,10 +187,9 @@ func GetFeedbacks(ctx *fiber.Ctx) error {
 		feedbacks = append(feedbacks, feedback)
 	}
 
-
 	return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
-		"message":    "Successfully retrieved feedbacks",
-		"success":    true,
+		"message":   "Successfully retrieved feedbacks",
+		"success":   true,
 		"feedbacks": feedbacks,
 	})
 }
